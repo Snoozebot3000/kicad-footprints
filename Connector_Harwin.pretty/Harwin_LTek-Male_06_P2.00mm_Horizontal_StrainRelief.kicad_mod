@@ -1,10 +1,10 @@
-(module Harwin_LTek-Male_06_P2.00mm_Angled_StrainRelief (layer F.Cu) (tedit 5F5FD44E)
-  (descr "Harwin LTek Connector, 6 pins, single row male, Angled entry, strain relief clip")
+(module Harwin_LTek-Male_06_P2.00mm_Horizontal_StrainRelief (layer F.Cu) (tedit 5F5FD44E)
+  (descr "Harwin LTek Connector, 6 pins, single row male, Horizontal entry, strain relief clip")
   (tags "connector harwin ltek M80")
   (fp_text reference REF** (at 1.016 4.9784 180) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )
-  (fp_text value Harwin_LTek-Male_06_P2.00mm_Angled_StrainRelief (at 0.4572 11.7602) (layer F.Fab)
+  (fp_text value Harwin_LTek-Male_06_P2.00mm_Horizontal_StrainRelief (at 0.4572 11.7602) (layer F.Fab)
     (effects (font (size 1 1) (thickness 0.15)))
   )
   (fp_line (start 11.6576 4.5022) (end 12.4196 5.9754) (layer F.Fab) (width 0.1))
@@ -47,7 +47,7 @@
   (pad 4 thru_hole circle (at 6 -2.875) (size 1.35 1.35) (drill 0.8) (layers *.Cu *.Mask))
   (pad 5 thru_hole circle (at 8 -2.875) (size 1.35 1.35) (drill 0.8) (layers *.Cu *.Mask))
   (pad 6 thru_hole circle (at 10 -2.875) (size 1.35 1.35) (drill 0.8) (layers *.Cu *.Mask))
-  (model ${KISYS3DMOD}/Connector_Harwin.3dshapes/Harwin_LTek-Male_06_P2.00mm_Angled_StrainRelief.wrl
+  (model ${KISYS3DMOD}/Connector_Harwin.3dshapes/Harwin_LTek-Male_06_P2.00mm_Horizontal_StrainRelief.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
