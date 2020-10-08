@@ -14,7 +14,7 @@ functions:
 import argparse
 
 import io
-"example using unix LF f=io.open('file.txt','w', newline='\n')"
+#example using unix LF f=io.open('file.txt','w', newline='\n')
 
 
 class HarwinLtekFootprint:
@@ -73,8 +73,9 @@ class HarwinLtekFootprint:
 
     partName = "Harwin_LTek-Male_{pins}"
     thPinDim = [1.35, 1.35, 0.8]
+    smdPadDim = [1.00, 3.20]
     strainPinDim = [1.5, 1.5, 0.95]
-    padString = "(pad {padID} {thSMD} {padShape} (at {xCoord} {yCoord}) (size {xSize} {ySize}) {drill} (layers {layers}.Cu {layers}.Mask))"
+    padString = "(pad {padID} {thSMD} {padShape} (at {xCoord} {yCoord}) (size {xSize} {ySize}) {drill} (layers {layers}))"
 
 
 
@@ -116,7 +117,7 @@ class HarwinLtekFootprint:
 
         Raises
         ------
-        None
+        Non valid connector row configuartions
 
         Returns
         -------
@@ -130,29 +131,61 @@ class HarwinLtekFootprint:
         if self.smd:
             myTH = "smd"
             myLayers = "F.Cu F.Paste F.Mask"
-            #need to figure out the 
-        else:
-            myTH = "thru_hole"
-            myLayers = "*"
             myPinsNum = self.pins
-            myPins.append(self.padString.format(padID= str(i), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(0.00), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
-            myPadShape  = "circle"
             if self.rows == 2:
                 myPinsNum = self.pins/2 #since there are 2 rows each row has half the pins.
-                myPins.append(self.padString.format(padID= str(myPinsNum+i), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(self.pitch), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= str(i+1), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(0.00), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= str(myPinsNum+i+1), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(self.pitch), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+            else:    
+                raise Exception('SMD vertical Harwin LTek connectors should only have 2 rows and not have {} row(s)'.format(self.pins))
                 
-
-            while i < myPinsNum:
+            while i < myPinsNum:  # Populate the pads for SMD Vertical parts
                 myXCoord = (float(i) * self.pitch)
-                myPins.append(self.padString.format(padID= str(i), thSMD=myTH, padShape=myPadShape, xCoord= str(myXCoord), yCoord= str(0.00), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= str(i+1), thSMD=myTH, padShape=myPadShape, xCoord= str(myXCoord), yCoord= str(0.00), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
                 if self.rows == 2:
-                    myPins.append(self.padString.format(padID= str(myPinsNum+i), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(self.pitch), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+                    myPins.append(self.padString.format(padID= str(myPinsNum+i+1), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(self.pitch), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
                 i += 1
             
             if self.strain:
-                #add the strain relief
-                myPins.append(self.padString.format(padID= "\"\"", thSMD=myTH, padShape=myPadShape, xCoord= str(myXCoord), yCoord= str(0.00), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+                #add the strain relief for vertical connectors
+                myXCoordStrainPlus = mXCoord + 2.25 #myXCoord is still the last pin from the above while loop
+                myXCoordStrainMinus = -2.25
+                myYCoordStrainPlus = 4.75/2.0
+                myYCoordStrainMinus = -1.0*(4.75/2.0)
+                myPins.append(self.padString.format(padID= "\"\"", thSMD="thru_hole", padShape=myPadShape, xCoord= str(myXCoordStrainMinus), yCoord= str(myYCoordStrainPlus), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= "\"\"", thSMD="thru_hole", padShape=myPadShape, xCoord= str(myXCoordStrainMinus), yCoord= str(myYCoordStrainMinus), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= "\"\"", thSMD="thru_hole", padShape=myPadShape, xCoord= str(myXCoordStrainPlus), yCoord= str(myYCoordStrainPlus), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= "\"\"", thSMD="thru_hole", padShape=myPadShape, xCoord= str(myXCoordStrainPlus), yCoord= str(myYCoordStrainMinus), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+            #End of SMD Vertical Connectors    
+        else: #We have a through Hole part and need to treat it accordingly as pins instead of pads
+            myTH = "thru_hole"
+            myLayers = "*.Cu *.Mask"
+            myPinsNum = self.pins
+            myPins.append(self.padString.format(padID= str(i+1), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(0.00), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+            myPadShape  = "circle"
+            if self.rows == 2:
+                myPinsNum = self.pins/2 #since there are 2 rows each row has half the pins.
+                myPins.append(self.padString.format(padID= str(myPinsNum+i+1), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(self.pitch), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+                
 
+            while i < myPinsNum:  # Populate the pin pads for TH Vertical parts
+                myXCoord = (float(i) * self.pitch)
+                myPins.append(self.padString.format(padID= str(i+1), thSMD=myTH, padShape=myPadShape, xCoord= str(myXCoord), yCoord= str(0.00), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+                if self.rows == 2:
+                    myPins.append(self.padString.format(padID= str(myPinsNum+i+1), thSMD=myTH, padShape=myPadShape, xCoord= str(0.00), yCoord= str(self.pitch), xSize=str(self.thPinDim[0]), ySize=str(self.thPinDim[1]), drill= "(drill " + str(self.thPinDim[2]) + ") ", layers=myLayers))
+                i += 1
+            
+            if self.strain:
+                #add the strain relief for vertical connectors
+                myXCoordStrainPlus = mXCoord + 2.25 #myXCoord is still the last pin from the above while loop
+                myXCoordStrainMinus = -2.25
+                myYCoordStrainPlus = 4.75/2.0
+                myYCoordStrainMinus = -1.0*(4.75/2.0)
+                myPins.append(self.padString.format(padID= "\"\"", thSMD="thru_hole", padShape="circle", xCoord= str(myXCoordStrainMinus), yCoord= str(myYCoordStrainPlus), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= "\"\"", thSMD="thru_hole", padShape="circle", xCoord= str(myXCoordStrainMinus), yCoord= str(myYCoordStrainMinus), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= "\"\"", thSMD="thru_hole", padShape="circle", xCoord= str(myXCoordStrainPlus), yCoord= str(myYCoordStrainPlus), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+                myPins.append(self.padString.format(padID= "\"\"", thSMD="thru_hole", padShape="circle", xCoord= str(myXCoordStrainPlus), yCoord= str(myYCoordStrainMinus), xSize=str(self.strainPinDim[0]), ySize=str(self.strainPinDim[1]), drill= "(drill " + str(self.strainPinDim[2]) + ") ", layers=myLayers))
+                
 
 
         return myPins
